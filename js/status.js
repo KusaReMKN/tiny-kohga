@@ -1,23 +1,24 @@
 'use strict';
 
-const outStatus = document.getElementById('outStatus') || { textContent: '' };
-
-export function
-append(...args)
-{
-	for (const str of args)
-		outStatus.textContent += str;
-}
-
-export function
-clear()
-{
-	outStatus.textContent = '';
-}
-
-export function
-write(...args)
-{
-	clear();
-	append(...args);
-}
+export default class Status {
+	#elemStatus;
+	constructor(id) {
+		const parentNode =
+			id && document.getElementById(id) || document.body;
+		const output = document.createElement('output');
+		output.style.display = 'block';
+		output.style.overflow = 'hidden';
+		this.#elemStatus = parentNode.appendChild(output);
+	}
+	append(...mesg) {
+		for (const str of mesg)
+			this.#elemStatus.textContent += str;
+	}
+	clear() {
+		this.#elemStatus.textContent = '';
+	}
+	write(...mesg) {
+		this.clear();
+		this.append(...mesg);
+	}
+};
