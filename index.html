@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>車両管理・制御システム Kohga</title>
+<link rel="stylesheet" href="https://necolas.github.io/normalize.css/latest/normalize.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css"
+	integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+	integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin></script>
+<script src="./js/tiny-kohga.js" type="module" defer></script>
+<style>
+.modalBackground {
+	height: 10rem;
+}
+</style>
+</head>
+<body style="display: flex; flex-direction: column; height: 99vh; justify-content: space-between;">
+<header>
+<h1>車両管理・制御システム Kohga</h1>
+</header>
+<section style="display: flex; flex-direction: column; flex-grow: 1;">
+<div id="formArea">
+<form id="beforeCheck" style="display: flex;">
+<fieldset style="flex: 1 0 50%;">
+<legend>新規ルート作成</legend>
+<label>
+<input type="radio" name="radMode" value="stop">
+停留所
+</label>
+<label>
+<input type="radio" name="radMode" value="thru">
+中継点
+</label>
+<button id="btnGenerateRoute">経路探索</button>
+</fieldset>
+<fieldset style="flex: 1 0 50%;">
+<legend>保存済み経路</legend>
+<label>
+経路名:
+<select id="slctRouteName">
+<option selected>--- 選択してください ---</option>
+</select>
+</label>
+<button id="btnQueueRoute">呼び出す</button>
+</fieldset>
+</form>
+<form id="afterCheck">
+<fieldset>
+<legend>経路を保存する</legend>
+<label>
+保存名:
+<input type="text" id="txtRouteName">
+</label>
+<button id="btnSaveRoute">保存する</button>
+</fieldset>
+<fieldset>
+<legend>経路を実行する</legend>
+<button id="btnExecuteRoute">実行する</button>
+</fieldset>
+</form>
+<form id="duringRunning">
+</form>
+</div>
+<div id="mapArea" style="flex-grow: 1;"></div>
+</section>
+<footer>
+<div>
+<output id="outStatus" style="display: block; overflow: hidden;"></output>
+<small>Kohga &copy; 2022 KusaReMKN.</small>
+</div>
+</footer>
+<script>
+	'use strct';
+	const map = L.map('mapArea').setView([ 38, 137 ], 13);
+	L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+		minZoom: 5,
+		maxZoom: 18,
+		attribution:
+		'<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>',
+	}).addTo(map);
+</script>
+</body>
+</html>
