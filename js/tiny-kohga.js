@@ -11,6 +11,11 @@ const map = L.map('mapArea').setView([ 35.658, 139.745 ], 16);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+const appendPoint = e => {
+	console.log(document.forms.beforeCheck.radMode.value, e.latlng);
+	L.marker(e.latlng).addTo(map);
+};
+
 const initForms = () => {
 	const forms = document.getElementsByTagName('form')
 	for (const elem of forms)
@@ -29,6 +34,7 @@ const initMap = () => {
 		'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
 		tileOptions,
 	).addTo(map);
+	map.on('click', appendPoint);
 };
 
 const initUserId = async () => {
