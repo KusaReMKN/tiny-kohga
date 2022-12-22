@@ -24,6 +24,9 @@ export default class Dialog {
 			this.content = cnt;
 		this.#elemDialog[modal ? 'showModal' : 'show']();
 	}
+	get opened() {
+		return this.#elemDialog.open;
+	}
 	reset() {
 		const clone = this.#elemDialog.cloneNode(false);
 		const parent = this.#elemDialog.parentNode;

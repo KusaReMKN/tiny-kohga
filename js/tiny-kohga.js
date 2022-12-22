@@ -11,13 +11,70 @@ const map = L.map('mapArea').setView([ 35.658, 139.745 ], 16);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const appendPoint = e => {
-	console.log(document.forms.beforeCheck.radMode.value, e.latlng);
-	L.marker(e.latlng).addTo(map);
+const routePoints = [];
+
+const appendPoint = async e => {
+	const type = document.forms.beforeCheck.radMode.value;
+	if (type !== 'stop' && type !== 'thru')
+		return;
+	if (type === 'thru' && routePoints.length === 0) {
+		dialog.open(true, `
+			<div>
+			<p>最初の地点は停留所である必要があります</p>
+			<button onclick="this.parentNode.parentNode.close();">
+			了解
+			</button>
+			</div>
+		`);
+		await new Promise(r => {
+			const timer = setInterval(() => {
+				if (!dialog.opened) {
+					clearInterval(timer);
+					r();
+				}
+			});
+		});
+		dialog.close();
+		return;
+	}
+	switch (type) {
+		case 'stop':
+			if (routePoints.length !== 0)
+				routePoints.at(-1).push(e.latlng);
+			routePoints.push([ e.latlng ]);
+			break;
+		case 'thru':
+			routePoints.at(-1).push(e.latlng);
+			break;
+	}
+	const icon = L.divIcon({
+		html: `
+		<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+			width="30" height="52" viewBox="0 0 40 70">
+		<g fill="${type === 'stop' ? 'blue' : 'red'}" stroke="none">
+		<circle cx="20" cy="20" r="20" />
+		<polygon points="1.672,28 20,70 38.218,28" />
+		</g>
+		<g fill="white" stroke="gray" stroke-width="1">
+		<text x="20" y="28" style="font: bold 16px sans-serif;"
+			text-anchor="middle">
+		${type === 'stop' ? ''+routePoints.length
+		: ''+routePoints.length+'-'+(routePoints.at(-1).length - 1)}
+		</text>
+		</g>
+		</svg>
+		`,
+		iconSize: L.point(30, 52),
+		iconAnchor: L.point(15, 52),
+		className: '_',
+	});
+	L.marker(e.latlng, {
+		icon,
+	}).addTo(map);
 };
 
 const initForms = () => {
-	const forms = document.getElementsByTagName('form')
+	const forms = document.getElementsByTagName('form');
 	for (const elem of forms)
 		elem.addEventListener('submit', e => e.preventDefault());
 };
