@@ -255,3 +255,22 @@ export function reqPassable(userId) {
 		setTimeout(() => r(result), Math.random() * 1000)
 	);
 }
+
+export function astar(userId, args) {
+	const result = !userId || !args.data || Math.random() < .1 ? {
+		succeeded: false,
+		reason: "something wrong",
+	} : {
+		succeeded: true,
+		route: args.data.reduce((r, e) => {
+			if (r.length === 0)
+				r.push(e);
+			else
+				r.push(L.latlng(r.at(-1).lat, e.lng), e);
+			return r;
+		}, []),
+	};
+	return new Promise(r =>
+		setTimeout(() => r(result), Math.random() * 10000)
+	);
+}

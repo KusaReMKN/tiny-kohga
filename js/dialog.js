@@ -2,6 +2,7 @@
 
 export default class Dialog {
 	#elemDialog;
+	status;
 	constructor(id) {
 		const parentNode =
 			id && document.getElementById(id) || document.body;

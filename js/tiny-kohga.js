@@ -13,6 +13,84 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const routePoints = [];
 
+const generateIcon = type => L.divIcon({
+	html: `
+	<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+		width="30" height="52" viewBox="0 0 40 70">
+	<g fill="${type === 'stop' ? 'blue' : 'red'}" stroke="none">
+	<circle cx="20" cy="20" r="20" />
+	<polygon points="1.672,28 20,70 38.218,28" />
+	</g>
+	<g fill="white" stroke="gray" stroke-width="1">
+	<text x="20" y="28" style="font: bold 16px sans-serif;"
+		text-anchor="middle">
+	${type === 'stop' ? ''+(routePoints.length+1)
+	: ''+routePoints.length+'-'+(routePoints.at(-1).length)}
+	</text>
+	</g>
+	</svg>
+	`,
+	iconSize: L.point(30, 52),
+	iconAnchor: L.point(15, 52),
+	className: '_',
+});
+
+const removePoint = async e => {
+	const dialogContent = document.createElement('div');
+	const p = document.createElement('p');
+	p.textContent = '選択した地点を削除しますか？';
+	dialogContent.appendChild(p);
+	const buttons = document.createElement('div');
+	const btnYes = document.createElement('button');
+	btnYes.textContent = 'Yes';
+	btnYes.onclick = () => { dialog.status = true; dialog.close() };
+	buttons.appendChild(btnYes);
+	buttons.appendChild(document.createTextNode(' '));
+	const btnCancel = document.createElement('button');
+	btnCancel.textContent = 'No';
+	btnCancel.onclick = () => { dialog.status = false; dialog.close() };
+	buttons.appendChild(btnCancel);
+	dialogContent.appendChild(buttons);
+	dialog.open(true, dialogContent);
+	await new Promise(r => {
+		const timer = setInterval(() => {
+			if (!dialog.opened) {
+				clearInterval(timer);
+				r();
+			}
+		});
+	});
+	dialog.close();
+	if (dialog.status === false)
+		return;
+	const cat = routePoints.reduce((c, r, i) => {
+		c.push(...r.reduce((c, p, j, r) => {
+			if (p.marker !== e.target) {
+				c.push(p);
+			} else if (i === 0 && j === 0) {
+				for (const p of r)
+					if (p.type === 'thru')
+						p.marker.remove();
+				return r.length = 0, [];
+			}
+			return c;
+		}, []));
+		return c;
+	}, []);
+	e.target.remove();
+	routePoints.length = 0;
+	const first = cat.shift();
+	first.marker.setIcon(generateIcon(first.type));
+	routePoints.push([ first ]);
+	for (const p of cat) {
+		p.marker.setIcon(generateIcon(p.type));
+		if (p.type === 'stop'
+				&& routePoints.at(-1).at(-1).type === 'stop')
+			routePoints.push([]);
+		routePoints.at(-1).push(p);
+	}
+};
+
 const appendPoint = async e => {
 	const type = document.forms.beforeCheck.radMode.value;
 	if (type !== 'stop' && type !== 'thru')
@@ -37,40 +115,21 @@ const appendPoint = async e => {
 		dialog.close();
 		return;
 	}
+	const icon = generateIcon(type);
+	const marker = L.marker(e.latlng, { icon })
+	marker.on('click', removePoint);
+	marker.addTo(map);
+	const routePoint = { ...e.latlng, type, marker };
 	switch (type) {
 		case 'stop':
 			if (routePoints.length !== 0)
-				routePoints.at(-1).push(e.latlng);
-			routePoints.push([ e.latlng ]);
+				routePoints.at(-1).push(routePoint);
+			routePoints.push([ routePoint ]);
 			break;
 		case 'thru':
-			routePoints.at(-1).push(e.latlng);
+			routePoints.at(-1).push(routePoint);
 			break;
 	}
-	const icon = L.divIcon({
-		html: `
-		<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-			width="30" height="52" viewBox="0 0 40 70">
-		<g fill="${type === 'stop' ? 'blue' : 'red'}" stroke="none">
-		<circle cx="20" cy="20" r="20" />
-		<polygon points="1.672,28 20,70 38.218,28" />
-		</g>
-		<g fill="white" stroke="gray" stroke-width="1">
-		<text x="20" y="28" style="font: bold 16px sans-serif;"
-			text-anchor="middle">
-		${type === 'stop' ? ''+routePoints.length
-		: ''+routePoints.length+'-'+(routePoints.at(-1).length - 1)}
-		</text>
-		</g>
-		</svg>
-		`,
-		iconSize: L.point(30, 52),
-		iconAnchor: L.point(15, 52),
-		className: '_',
-	});
-	L.marker(e.latlng, {
-		icon,
-	}).addTo(map);
 };
 
 const initForms = () => {
@@ -156,4 +215,61 @@ const initialize = async () => {
 	await initPassable();
 };
 
+const searchRoute = async () => {
+	const rpData = routePoints.map(r => r.map(e => ({ ...e })));
+	if (rpData.length === 0) {
+		dialog.open(true, `
+			<div>
+			<p>一つ以上の停留所を設定する必要があります</p>
+			<button onclick="this.parentNode.parentNode.close();">
+			了解
+			</button>
+			</div>
+		`);
+		await new Promise(r => {
+			const timer = setInterval(() => {
+				if (!dialog.opened) {
+					clearInterval(timer);
+					r();
+				}
+			});
+		});
+		dialog.close();
+		return;
+	}
+	if (!chkPatrol.checked && rpData.at(-1).at(-1).type !== "stop") {
+		dialog.open(true, `
+			<div>
+			<p>非巡回経路の終点は停留所である必要があります</p>
+			<button onclick="this.parentNode.parentNode.close();">
+			了解
+			</button>
+			</div>
+		`);
+		await new Promise(r => {
+			const timer = setInterval(() => {
+				if (!dialog.opened) {
+					clearInterval(timer);
+					r();
+				}
+			});
+		});
+		dialog.close();
+		return;
+	}
+	if (rpData.length === 1) {
+		rpData.at(-1).push(rpData.at(-1).at(-1));
+	} else {
+		if (chkPatrol.checked)
+			rpData.at(-1).push(rpData[0][0]);
+		else
+			void rpData.pop();
+	}
+	for (const route of rpData)
+		for (const point of route)
+			[ 'type', 'marker' ].forEach(k => delete point[k]);
+	console.debug(rpData);
+};
+
 window.addEventListener('load', () => initialize());
+btnGenerateRoute.addEventListener('click', () => searchRoute());
