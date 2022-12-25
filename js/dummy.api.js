@@ -257,7 +257,7 @@ export function reqPassable(userId) {
 }
 
 export function astar(userId, args) {
-	const result = !userId || !args.data || Math.random() < .1 ? {
+	const result = !userId || !args.data || Math.random() < .05 ? {
 		succeeded: false,
 		reason: "something wrong",
 	} : {
@@ -266,7 +266,7 @@ export function astar(userId, args) {
 			if (r.length === 0)
 				r.push(e);
 			else
-				r.push(L.latlng(r.at(-1).lat, e.lng), e);
+				r.push(L.latLng(r.at(-1).lat, e.lng), e);
 			return r;
 		}, []),
 	};

@@ -8,6 +8,7 @@ import * as Manki from './manki.js';
 const status = new Status('statusArea');
 const dialog = new Dialog();
 const map = L.map('mapArea').setView([ 35.658, 139.745 ], 16);
+const global = {};
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -63,6 +64,7 @@ const removePoint = async e => {
 	dialog.close();
 	if (dialog.status === false)
 		return;
+
 	const cat = routePoints.reduce((c, r, i) => {
 		c.push(...r.reduce((c, p, j, r) => {
 			if (p.marker !== e.target) {
@@ -77,14 +79,18 @@ const removePoint = async e => {
 		}, []));
 		return c;
 	}, []);
+
 	e.target.remove();
 	routePoints.length = 0;
+	if (cat.length === 0)
+		return;
 	const first = cat.shift();
 	first.marker.setIcon(generateIcon(first.type));
 	routePoints.push([ first ]);
 	for (const p of cat) {
 		p.marker.setIcon(generateIcon(p.type));
 		if (p.type === 'stop'
+				&& routePoints.at(-1).length !== 1
 				&& routePoints.at(-1).at(-1).type === 'stop')
 			routePoints.push([]);
 		routePoints.at(-1).push(p);
@@ -257,18 +263,43 @@ const searchRoute = async () => {
 		dialog.close();
 		return;
 	}
-	if (rpData.length === 1) {
-		rpData.at(-1).push(rpData.at(-1).at(-1));
-	} else {
-		if (chkPatrol.checked)
-			rpData.at(-1).push(rpData[0][0]);
-		else
-			void rpData.pop();
-	}
+	if (rpData.length === 1 || chkPatrol.checked)
+		rpData.at(-1).push(rpData[0][0]);
+	else
+		void rpData.pop();
 	for (const route of rpData)
 		for (const point of route)
 			[ 'type', 'marker' ].forEach(k => delete point[k]);
-	console.debug(rpData);
+	status.write('経路を探索中 ... ');
+	dialog.open(true, '<p>Loading ...</p>');
+	const route = await Manki.astar(sessionStorage.userId, rpData);
+	dialog.close();
+	if (!route) {
+		status.append('失敗。');
+		dialog.open(true, `
+			<div>
+			<p>経路探索に失敗しました。
+			現時点では再挑戦すれば成功すると思います。</p>
+			<button onclick="this.parentNode.parentNode.close();">
+			了解
+			</button>
+			</div>
+		`);
+		await new Promise(r => {
+			const timer = setInterval(() => {
+				if (!dialog.opened) {
+					clearInterval(timer);
+					r();
+				}
+			});
+		});
+		dialog.close();
+		return;
+	}
+	status.append('成功。総距離: ',
+			route.reduce((c, r) => c + r.reduce((c, p, i, r) =>
+				c + (i ? map.distance(r[i-1], p) : 0), 0), 0));
+	L.polyline(route, { color: 'lime', weight: 10 }).addTo(map);
 };
 
 window.addEventListener('load', () => initialize());
