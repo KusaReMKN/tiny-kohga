@@ -1,5 +1,10 @@
-'use strict';
+/** @module DummyApi */
 
+/**
+ * 新しいユーザ識別子を発行する（ふりをする）。
+ *
+ * @return {Promise<CreateUserResult>}
+ */
 export function createUser() {
 	const result = Math.random() < .1 ? {
 		succeeded: false,
@@ -12,6 +17,12 @@ export function createUser() {
 	);
 }
 
+/**
+ * 全ての保存済みの経路名情報を取得する（ふりをする）。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @return {Promise<RouteNameResult>}
+ */
 export function routeName(userId) {
 	const result = !userId || Math.random() < .1 ? {
 		succeeded: false,
@@ -33,6 +44,12 @@ export function routeName(userId) {
 	);
 }
 
+/**
+ * 通行可能領域情報を取得する（ふりをする）。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @return {Promise<ReqPassableResult>}
+ */
 export function reqPassable(userId) {
 	const result = !userId || Math.random() < .1 ? {
 		succeeded: false,
@@ -256,6 +273,14 @@ export function reqPassable(userId) {
 	);
 }
 
+/**
+ * 地点を通るルートを探索する（ふりをする）。
+ * args は data: Position[] を含んでいること。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @param {AstarArgs} args その他の引数
+ * @return {Promise<AstarResult>}
+ */
 export function astar(userId, args) {
 	const result = !userId || !args.data || Math.random() < .05 ? {
 		succeeded: false,

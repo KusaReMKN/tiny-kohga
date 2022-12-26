@@ -17,7 +17,7 @@
 </header>
 <section style="display: flex; flex-direction: column; flex-grow: 1;">
 <div id="formArea">
-<form id="beforeCheck" style="display: flex;">
+<form id="beforeCheck" style="display: none;">
 <fieldset style="flex: 1 0 45%;">
 <legend>新規ルート作成</legend>
 <label>
@@ -45,7 +45,7 @@
 <button id="btnQueueRoute">呼び出す</button>
 </fieldset>
 </form>
-<form id="afterCheck" style="display: flex;">
+<form id="afterCheck" style="display: none;">
 <fieldset style="flex: 1 0 45%;">
 <legend>経路を実行する</legend>
 <button id="btnExecuteRoute">実行する</button>
@@ -59,7 +59,7 @@
 <button id="btnSaveRoute">保存する</button>
 </fieldset>
 </form>
-<form id="duringRunning" style="display: flex;">
+<form id="duringRunning" style="display: none;">
 <fieldset style="flex: 1 0 45%;">
 <legend>経路実行を制御する</legend>
 <button id="btnCancel">経路実行をキャンセルする</button>
