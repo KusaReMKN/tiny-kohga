@@ -24,7 +24,7 @@ export function initialize(userId, status, dialog, map) {
 }
 
 export function quit() {
-	global.map.off();
+	global.map.off('click', appendPoint);
 	routePoints.forEach(r => r.forEach(p => p.marker.remove()));
 	beforeCheck.style.display = 'none';
 	btnGenerateRoute.removeEventListener('click', searchRoute);
