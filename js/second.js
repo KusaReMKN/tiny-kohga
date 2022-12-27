@@ -1,5 +1,5 @@
 /**
- * @module First
+ * @module Second
  * @requires Leaflet, First
  */
 
@@ -44,6 +44,7 @@ export function initialize(userId, status, dialog, map, route) {
 	).addTo(global.map);
 	afterCheck.style.display = 'flex';
 	btnEditRoute.addEventListener('click', editRoute);
+	console.debug('route', JSON.stringify(route));
 }
 
 export function quit() {

@@ -1,3 +1,11 @@
+/**
+ * @module First
+ * @requires Leaflet
+ * @requires generateIcon
+ * @requires Manki
+ * @requires Second
+ */
+
 import generateIcon from './icon.js';
 
 import * as Manki from './manki.js';
@@ -12,6 +20,19 @@ const global = {
 
 const routePoints = [];
 
+/**
+ * 状態を初期化する。
+ *
+ * マップをクリックしたら appendPoint を発火させる。
+ * 前回の経路生成情報があれば表示する。
+ * 第一段階のフォームを表示する。
+ * 経路探索ボタンをクリックしたら searchRoute を発火させる。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @param {Status} status ステータスバーのインスタンス
+ * @param {Dialog} dialos ダイアログのインスタンス
+ * @param {Map} map Leaflet のマップ
+ */
 export function initialize(userId, status, dialog, map) {
 	global.userId = userId;
 	global.status = status;
@@ -23,6 +44,14 @@ export function initialize(userId, status, dialog, map) {
 	btnGenerateRoute.addEventListener('click', searchRoute);
 }
 
+/**
+ * 状態から抜ける。
+ *
+ * マップをクリックしても appendPoint は発火しない。
+ * マーカは全て消される。
+ * 第一段階のフォームを非表示にする。
+ * 経路探索ボタンをクリックしても searchRoute は発火しない。
+ */
 export function quit() {
 	global.map.off('click', appendPoint);
 	routePoints.forEach(r => r.forEach(p => p.marker.remove()));
@@ -30,6 +59,17 @@ export function quit() {
 	btnGenerateRoute.removeEventListener('click', searchRoute);
 }
 
+/**
+ * マップの click に対応するイベントハンドラ。
+ * 指定された位置にマーカを設置する。
+ *
+ * 地点の種類が規定以外なら黙って無視し、
+ * 始点が中継点なら警告して無視し、
+ * さもなければマーカを生成し、表示し、イベントハンドラを載せ、
+ * 経路生成情報を更新する。
+ *
+ * @param {MouseEvent} e クリック時のマウスイベント
+ */
 async function appendPoint(e) {
 	const type = document.forms.beforeCheck.radMode.value;
 	if (type !== 'stop' && type !== 'thru')
@@ -71,6 +111,12 @@ async function appendPoint(e) {
 	}
 }
 
+/**
+ * generateIcon に渡す引数リストを生成する（愚か）。
+ * 生成される内容は経路生成情報に依存する。
+ *
+ * @param {string} type 停留所と中継点を識別する文字列
+ */
 function iconArgs(type) {
 	return [
 		type === 'stop' ? 'blue' : 'red',
@@ -79,6 +125,16 @@ function iconArgs(type) {
 	];
 }
 
+/**
+ * マーカの click に対応するイベントハンドラ。
+ * 指定されたマーカを削除し、経路生成情報を更新する。
+ *
+ * 警告して正気か尋ね、さもなければ無視し、
+ * さらば経路生成情報から対応する地点を削除し、
+ * マーカを削除し、経路生成情報を更新する。
+ *
+ * @param {MouseEvent} e クリック時のマウスイベント
+ */
 async function removePoint(e) {
 	const dialogContent = document.createElement('div');
 	const p = document.createElement('p');
@@ -144,6 +200,16 @@ async function removePoint(e) {
 	}
 }
 
+/**
+ * 経路探索ボタンの click に対応するイベントハンドラ。
+ * 経路を生成して、成功したなら第二状態に移行する。
+ *
+ * 経路生成情報が空なら警告して無視し、
+ * 非巡回ルートであって終点が中継点であれば警告して無視し、
+ * さもなければ巡回・非巡回に応じて経路生成情報を調整し、
+ * 経路探索 API をコールし、失敗したら警告して無視し、
+ * さもなければ第二状態に移行する。
+ */
 async function searchRoute() {
 	const rpData = routePoints.map(r => r.map(e => ({ ...e })));
 	if (rpData.length === 0) {

@@ -1,6 +1,33 @@
 /** @module DummyApi */
 
 /**
+ * 地点を通るルートを探索する（ふりをする）。
+ * args は data: Position[] を含んでいること。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @param {AstarArgs} args その他の引数
+ * @return {Promise<AstarResult>}
+ */
+export function astar(userId, args) {
+	const result = !userId || !args.data || Math.random() < .05 ? {
+		succeeded: false,
+		reason: "something wrong",
+	} : {
+		succeeded: true,
+		route: args.data.reduce((r, e) => {
+			if (r.length === 0)
+				r.push(e);
+			else
+				r.push(L.latLng(r.at(-1).lat, e.lng), e);
+			return r;
+		}, []),
+	};
+	return new Promise(r =>
+		setTimeout(() => r(result), Math.random() * 10000)
+	);
+}
+
+/**
  * 新しいユーザ識別子を発行する（ふりをする）。
  *
  * @return {Promise<CreateUserResult>}
@@ -11,33 +38,6 @@ export function createUser() {
 	} : {
 		succeeded: true,
 		userId: 'dummy' + String(Math.random()).substring(2),
-	};
-	return new Promise(r =>
-		setTimeout(() => r(result), Math.random() * 1000)
-	);
-}
-
-/**
- * 全ての保存済みの経路名情報を取得する（ふりをする）。
- *
- * @param {UserId} userId ユーザ識別子
- * @return {Promise<RouteNameResult>}
- */
-export function routeName(userId) {
-	const result = !userId || Math.random() < .1 ? {
-		succeeded: false,
-	} : {
-		succeeded: true,
-		passableNames: [
-			{
-				routeName: 'ゆめ咲線直通桜島行き',
-				available: true,
-			},
-			{
-				routeName: '完全版 Kohga 完成ルート',
-				available: false,
-			},
-		],
 	};
 	return new Promise(r =>
 		setTimeout(() => r(result), Math.random() * 1000)
@@ -274,28 +274,135 @@ export function reqPassable(userId) {
 }
 
 /**
- * 地点を通るルートを探索する（ふりをする）。
- * args は data: Position[] を含んでいること。
+ * 保存済みの経路を取得する（ふりをする）。
+ * args は routeName: string を含んでいること。
  *
  * @param {UserId} userId ユーザ識別子
- * @param {AstarArgs} args その他の引数
- * @return {Promise<AstarResult>}
+ * @param {ReqRouteArgs} args その他の引数
+ * @return {Promise<ReqRouteResult>}
  */
-export function astar(userId, args) {
-	const result = !userId || !args.data || Math.random() < .05 ? {
+export function reqRoute(userId, args) {
+	const result = !userId || args.routeName !== 'ゆめ咲線直通桜島行き'
+			|| Math.random() < .1 ? {
 		succeeded: false,
-		reason: "something wrong",
 	} : {
 		succeeded: true,
-		route: args.data.reduce((r, e) => {
-			if (r.length === 0)
-				r.push(e);
-			else
-				r.push(L.latLng(r.at(-1).lat, e.lng), e);
-			return r;
-		}, []),
+		route: [
+			[
+				{
+					"lat": 35.65529127055111,
+					"lng": 139.74510669708255
+				},
+				{
+					"lat": 35.65529127055111,
+					"lng": 139.74671602249148
+				},
+				{
+					"lat": 35.658462096656926,
+					"lng": 139.74671602249148
+				},
+				{
+					"lat": 35.658462096656926,
+					"lng": 139.74296092987063
+				},
+				{
+					"lat": 35.65954223943891,
+					"lng": 139.74296092987063
+				}
+			],
+			[
+				{
+					"lat": 35.65954223943891,
+					"lng": 139.74296092987063
+				},
+				{
+					"lat": 35.65954223943891,
+					"lng": 139.74489212036136
+				},
+				{
+					"lat": 35.66274773844904,
+					"lng": 139.74489212036136
+				},
+				{
+					"lat": 35.66274773844904,
+					"lng": 139.73783254623416
+				},
+				{
+					"lat": 35.66118192062334,
+					"lng": 139.73783254623416
+				}
+			],
+			[
+				{
+					"lat": 35.66118192062334,
+					"lng": 139.73783254623416
+				},
+				{
+					"lat": 35.66118192062334,
+					"lng": 139.73875522613528
+				},
+				{
+					"lat": 35.664840285079194,
+					"lng": 139.73875522613528
+				},
+				{
+					"lat": 35.664840285079194,
+					"lng": 139.7322750091553
+				},
+				{
+					"lat": 35.66313306919273,
+					"lng": 139.7322750091553
+				}
+			]
+		],
+		dest: [
+			{
+				lat: 35.65529127055111,
+				lng: 139.74510669708255
+			},
+			{
+				lat: 35.65954223943891,
+				lng: 139.74296092987063
+			},
+			{
+				lat: 35.66118192062334,
+				lng: 139.73783254623416
+			},
+			{
+				lat: 35.66313306919273,
+				lng: 139.7322750091553
+			},
+		],
+		junkai: false,
 	};
 	return new Promise(r =>
-		setTimeout(() => r(result), Math.random() * 10000)
+		setTimeout(() => r(result), Math.random() * 1000)
+	);
+}
+
+/**
+ * 全ての保存済みの経路名情報を取得する（ふりをする）。
+ *
+ * @param {UserId} userId ユーザ識別子
+ * @return {Promise<RouteNameResult>}
+ */
+export function routeName(userId) {
+	const result = !userId || Math.random() < .1 ? {
+		succeeded: false,
+	} : {
+		succeeded: true,
+		passableNames: [
+			{
+				routeName: 'ゆめ咲線直通桜島行き',
+				available: true,
+			},
+			{
+				routeName: '完全版 Kohga 完成ルート',
+				available: false,
+			},
+		],
+	};
+	return new Promise(r =>
+		setTimeout(() => r(result), Math.random() * 1000)
 	);
 }
