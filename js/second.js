@@ -40,7 +40,7 @@ export function initialize(userId, status, dialog, map, route) {
 	}
 	global.routeLine = L.polyline(
 		routeData,
-		{ weight: 10, color: 'lime' }
+		{ weight: 10, color: 'green' }
 	).addTo(global.map);
 	afterCheck.style.display = 'flex';
 	btnEditRoute.addEventListener('click', editRoute);
