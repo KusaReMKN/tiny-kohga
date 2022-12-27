@@ -261,7 +261,7 @@ async function searchRoute() {
 			[ 'type', 'marker' ].forEach(k => delete point[k]);
 	global.status.write('経路を探索中 ... ');
 	global.dialog.open(true, '<p>Loading ...</p>');
-	const route = await Manki.astar(sessionStorage.userId, rpData);
+	const route = await Manki.astar(global.userId, rpData);
 	global.dialog.close();
 	if (!route) {
 		global.status.append('失敗。');
