@@ -9,7 +9,7 @@
  * @return {Promise<AstarResult>}
  */
 export function astar(userId, args) {
-	const result = !userId || !args.data || Math.random() < .05 ? {
+	const result = !userId || !args.data || Math.random() < .00 ? {
 		succeeded: false,
 		reason: "something wrong",
 	} : {
