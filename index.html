@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>車両管理・制御システム Kohga</title>
+<link rel="stylesheet" href="https://necolas.github.io/normalize.css/latest/normalize.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css"
+	integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+	integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin></script>
+<script src="./js/tiny-kohga.js" type="module" defer></script>
+</head>
+<body style="display: flex; flex-direction: column; height: 99vh; justify-content: space-between;">
+<header>
+<h1>車両管理・制御システム Kohga</h1>
+</header>
+<section style="display: flex; flex-direction: column; flex-grow: 1;">
+<div id="formArea">
+<form id="beforeCheck" style="display: none;">
+<fieldset style="flex: 1 0 45%;">
+<legend>新規ルート作成</legend>
+<label>
+<input type="radio" name="radMode" value="stop">
+停留所
+</label>
+<label>
+<input type="radio" name="radMode" value="thru">
+中継点
+</label>
+<button id="btnGenerateRoute">経路探索</button>
+<label>
+<input type="checkbox" id="chkPatrol" value="patrol">
+巡回経路
+</label>
+</fieldset>
+<fieldset style="flex: 1 0 45%;">
+<legend>保存済み経路</legend>
+<label>
+経路名:
+<select id="slctRouteName">
+<option selected>--- 選択してください ---</option>
+</select>
+</label>
+<button id="btnQueueRoute">呼び出す</button>
+</fieldset>
+</form>
+<form id="afterCheck" style="display: none;">
+<fieldset style="flex: 1 0 20%;">
+<legend>やっぱりやめる</legend>
+<button id="btnEditRoute">経路を再編集する</button>
+</fieldset>
+<fieldset style="flex: 1 0 20%;">
+<legend>経路を実行する</legend>
+<button id="btnExecuteRoute">実行する</button>
+</fieldset>
+<fieldset style="flex: 1 0 45%;">
+<legend>経路を保存する</legend>
+<label>
+保存名:
+<input type="text" id="txtRouteName">
+</label>
+<button id="btnSaveRoute">保存する</button>
+</fieldset>
+</form>
+<form id="duringRunning" style="display: none;">
+<fieldset style="flex: 1 0 45%;">
+<legend>経路実行を制御する</legend>
+<button id="btnCancel">経路実行をキャンセルする</button>
+<button id="btnNextStop">次の停留所へ移動する</button>
+</fieldset>
+</form>
+</div>
+<div id="mapArea" style="flex-grow: 1;"></div>
+</section>
+<footer>
+<div id="statusArea"></div>
+<div style="text-align: center;">
+<small>Kohga &copy; 2022 情報二課.</small>
+</div>
+</footer>
+</body>
+</html>
